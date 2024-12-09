@@ -18,7 +18,7 @@ const bodyParser = require('body-parser');
 // zugewiesen an die Konstante namens PORT. Das einfache Gleichheitszeichen lässt sich also übersetzen
 // mit "... wird zugewiesen an ..."
 
-const PORT = 3000;
+const PORT = 3001;
 
 // Der Wert '0.0.0.0' wird zugewiesen an eine Konstante namens HOST 
 const HOST = '0.0.0.0';
@@ -38,24 +38,88 @@ app.use(bodyParser.urlencoded({extended: true}))
 
 // Hier kommt das Kunden(-berater) objekt hin:
 
+class Kunde{
+	constructor(){
+		this.Id
+		this.Benutzername
+		this.Kennwort
+		this.Vorname
+		this.Nachname
+	}
+}
+
+let kunde = new Kunde
+kunde.id = 1
+kunde.benutzername = "Klaus"
+kunde.kennwort = "a123"
+kunde.vorname = "Klaus"
+kunde.nachname = "Schöttler"
+
+class Kundenberater{
+	constructor(){
+		this.Name
+		this.Angesteltenid
+	}
+}
+
+let kundenberater1 = new Kundenberater
+kundenberater1.name = "Frank Müller"
+kundenberater1.angesteltenid = 1
+
+let kundenberater2 = new Kundenberater
+kundenberater2.name = "Karsten Schoppen"
+kundenberater2.angesteltenid = 2
+
+let aktiverberatername
+if(kunde.id <=10 && kunde.id >=1){
+	aktiverberatername = kundenberater1.name
+} else {
+	aktiverberatername = kundenberater2.name
+}
 
 
+app.get('/login', (req, res) => {
+	res.render('login.ejs',{
+		Meldung: ""
+	});
+});
 
+app.post('/login', (req, res) => {
 
+	// Die Werte, die der Kunde im Formular eingegeben hat, werden an den Server gesendet.
+	// Der Wert der Variablen Betrag wird aus dem body der Kundenanfrage (req) ausgelesen und zugewiesen an die lokale Variable
+	// namens betrag.
 
+	let kennwort = req.body.Kennwort
+	console.log("login: Kennwort: " + kennwort)
 
+	let benutzername = req.body.Benutzername;
+	console.log("login: Benutzername " + benutzername)
+
+	if(kunde.benutzername === benutzername && kunde.kennwort === kennwort){
+		res.render('index.ejs',{})
+	} else {
+	res.render('login.ejs',{
+		Meldung: "Versuchen sie es erneut"
+	})};
+});
+
+app.get('/hilfe', (req, res) => {
+	res.render('hilfe.ejs',{
+		Kundenberater: aktiverberatername
+	});
+});
+
+app.get('/profil', (req, res) => {
+	res.render('profil.ejs',{});
+});
 
 app.get('/', (req, res) => {
 	res.render('index.ejs',{});
 });
 
-
 app.get('/agb', (req, res) => {
 	res.render('agb.ejs',{});
-});
-
-app.get('/hilfe', (req, res) => {
-	res.render('hilfe.ejs',{});
 });
 
 app.get('/kontenuebersicht', (req, res) => {
@@ -68,7 +132,33 @@ app.get('/postfach', (req, res) => {
 });
 
 app.get('/kreditBeantragen', (req, res) => {
-	res.render('kreditBeantragen.ejs',{});
+	res.render('kreditBeantragen.ejs',{
+		Kreditbetrag:120,
+		Laufzeit:2,
+		Zinssatz:10,
+		Meldung: ""
+	})
+});
+
+app.post('/kreditBeantragen', (req, res) => {
+
+	let kreditbetrag = req.body.Kreditbetrag;
+	console.log("kreditBeantragen: Gewünschte Summe: " + kreditbetrag + " Euro")
+
+	let laufzeit = req.body.Laufzeit;
+	console.log("kreditBeantragen: Gewünschte Laufzeit: " + laufzeit + " Jahre")
+
+	let zinssatz = req.body.Zinssatz;
+	console.log("kreditBeantragen: Gewünschter Zinssatz: " + zinssatz + " Prozent")
+
+	let kredit = kreditbetrag * Math.pow(1 + zinssatz /100, laufzeit);
+	console.log("kreditBeantragen: Kredit Summe: " + kredit + " Euro")
+	res.render('kreditBeantragen.ejs',{
+		Kreditbetrag: kreditbetrag,
+		Laufzeit: laufzeit,
+		Zinssatz: zinssatz,
+		Meldung: "Die zurückzuzahlende Summe beträgt: " + kredit + " Euro"
+	});
 });
 
 app.get('/ueberweisungAusfuehren', (req, res) => {
@@ -119,9 +209,7 @@ app.post('/geldAnlegen', (req, res) => {
 	});
 });
 
-app.get('/login', (req, res) => {
-	res.render('login.ejs',{});
-});
+
 
 
 
